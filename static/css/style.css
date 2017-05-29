@@ -1,0 +1,276 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:400,700);
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+.wrapper, html, body {
+    font: 14px/20px "Lato", Arial, sans-serif;
+    height:100%;
+    margin:0;
+}
+
+ul{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+.wrapper {
+    display: flex;
+    flex-direction: column;
+}
+#row2 {
+    background-color: blue;
+    bottom: 0;
+}
+.chat {
+    flex:2;
+    display: flex;
+}
+#user-wrapper {
+    background-color: #444753;
+    flex :0 0 240px;
+}
+#chat-wrapper {
+    background-image: url(../img/itech_bg.png);
+    background-color: #f2f5f8;
+    flex: 1 1;
+    position: relative;
+    background-repeat: repeat;
+    background-size: 250px;
+    background-position-x: left;
+    background-position-y: bottom;
+}
+
+.online,
+.offline,
+.me {
+    margin-right: 3px;
+    font-size: 10px;
+}
+
+.online {
+    color: #86BB71;
+}
+
+.offline {
+    color: #E38968;
+}
+
+.me {
+    color: #94C2ED;
+}
+
+.align-left {
+    text-align: left;
+}
+
+.align-right {
+    text-align: right;
+}
+
+.float-right {
+    float: right;
+}
+
+.float-left {
+    float: left;
+}
+
+.clearfix:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+}
+
+
+
+
+
+.people-list {
+    color: white;
+    width: 260px;
+    float: left;
+    overflow-y: auto;
+    max-height: 100vh;
+}
+
+.people-list ul li {
+    padding: 10px;
+}
+
+.people-list ul li:hover {
+    background-color: rgba(0,0,0,0.2);
+}
+.people-list .about {
+    float: left;
+}
+.people-list .about {
+    padding-left: 8px;
+}
+.people-list .status {
+    color: #92959E;
+}
+
+
+::-webkit-scrollbar-track
+{
+    background-color: rgba(0,0,0,0.1);
+}
+
+::-webkit-scrollbar
+{
+    width: 3px;
+    background-color: rgba(0,0,0,0.1);
+}
+
+::-webkit-scrollbar-thumb
+{
+    background-color: rgba(0,0,0,0.4);
+}
+
+
+
+
+.chat .chat-history {
+    padding: 30px 30px 70px;
+    overflow-y: auto;
+    max-height: 100vh;
+}
+.chat .chat-history .message-data {
+    margin-bottom: 15px;
+}
+
+.chat .chat-history li.append .message-data {
+    display: none;
+}
+
+
+.chat .chat-history li.append .message {
+    margin-top: -37px;
+    border-radius: 0px 0px 7px 7px;
+}
+
+.chat .chat-history .message-data-time {
+    color: #a8aab1;
+    padding-left: 6px;
+}
+.chat .chat-history .message {
+    color: white;
+    padding: 8px 15px;
+    line-height: 26px;
+    font-size: 16px;
+    border-radius: 7px;
+    margin-bottom: 30px;
+    display: inline;
+    position: relative;
+    max-width: calc(90vw - 260px);
+    min-width: 300px;
+    word-wrap:break-word;
+}
+
+.chat .chat-history .message:after {
+    bottom: 100%;
+    left: 7%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-bottom-color: #86BB71;
+    border-width: 10px;
+    margin-left: -10px;
+}
+.chat .chat-history .my-message {
+    background: #86BB71;
+}
+.chat .chat-history .other-message {
+    background: #94C2ED;
+}
+.chat .chat-history .other-message:after {
+    border-bottom-color: #94C2ED;
+
+}
+
+.chat .chat-history .my-message:after {
+    left: 93%;
+}
+
+
+.chat .chat-history li.append .message:after {
+    display: none;
+}
+
+.chat-message{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background-color: rgba(242, 245, 248,0.5);
+}
+
+.chat .chat-message .editable {
+    width: 90%;
+    border: none;
+    padding: 9px 14px;
+    font: 14px/22px "Lato", Arial, sans-serif;
+    border-radius: 5px;
+    resize: none;
+    margin-left: 5%;
+    margin-top: 11px;
+    background-color: white;
+    padding-left: 40px;
+    box-shadow: 1px 1px 3px 2px rgba(0,0,0,0.05)
+}
+
+
+
+.chat .chat-history .message .emoji, .chat .chat-message .editable .emoji{
+    margin-right: 3px;
+    width: 1.4em;
+    height: 1.4em;
+    padding: 0 0 0 0;
+    vertical-align: -0.4em;
+}
+
+.emoji-icon{
+    margin-top: 10px;
+    left: 5vw;
+    position: absolute;
+    top: 9px;
+    font-size: 20px;
+    color: rgba(0,0,0,0.4);
+    cursor: pointer;
+}
+
+.emojis{
+    position: absolute;
+    font-size: 20px;
+    margin-left: 5%;
+    margin-top: -190px;
+    max-width: 90%;
+    background-color: #d3d5d7;
+    padding: 15px;
+    border-radius: 5px;
+    z-index: 1000;
+    display: none;
+}
+
+.emojis ul{
+    list-style-type: none;
+}
+.emojis ul li{
+    float: left;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.emojis ul li:hover{
+    background-color: rgba(0,0,0,0.3);
+}

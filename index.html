@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>FlexMess</title>
+      <link rel="stylesheet" media="all" href="./static/css/style.css">
+      <link rel="stylesheet" media="all" href="./static/emoji/css/style.css">
+      <link rel="stylesheet prefetch" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+
+  </head>
+  <body>
+
+  <div class="wrapper">
+      <div class="chat">
+          <div id="user-wrapper">
+
+              <div class="people-list">
+                  <ul class="list">
+
+                  </ul>
+              </div>
+
+          </div>
+          <div id="chat-wrapper">
+              <div class="chat-history">
+                  <ul>
+
+                  </ul>
+              </div>
+
+              <div class="chat-message">
+                  <div class="emojis">
+                      <ul>
+
+                      </ul>
+                  </div>
+                  <div class="emoji-icon">😃</div>
+                  <div id="message-to-send" class="editable" contenteditable></div>
+              </div>
+          </div>
+      </div>
+
+  </div>
+
+  <div id="my-message-template">
+      <div class="message-data align-right">
+          <span class="message-data-name"><span class="name"></span></span>
+          <span class="message-data-time"><span class="time"></span></span>
+          <span style="display: none" class="uuid"></span>
+      </div>
+      <div class="message my-message float-right">
+          <span class="message"></span>
+      </div>
+  </div>
+
+  <div id="other-message-template">
+      <div class="message-data ">
+          <span class="message-data-name"><span class="name"></span></span>
+          <span class="message-data-time"><span class="time"></span></span>
+          <span style="display: none" class="uuid"></span>
+      </div>
+      <div class="message other-message float-left">
+          <span class="message"></span>
+      </div>
+  </div>
+
+
+  <script>
+      var smileys = "😁,😂,😃,😄,😅,😆,😉,😊,😋,😌,😍,😏,😒,😓,😔,😖,😘,😚,😜,😝,😞,😠,😡,😢,😣,😤,😥,😨,😩,😪,😫,😭,😰,😱,😲,😳,😵,😷,😸,😹,😺,😻,😼,😽,😾,😿,🙀,🙅,🙆,🙇,🙈,🙉,🙊,🙋,🙌,🙍,🙎,🙏"
+
+      var userlist = {"keys" : [], "user": []};
+
+
+      window.$ = window.jQuery = require('jquery');
+      window.timeago = require('timeago');
+
+      $(document).ready(function () {
+
+          var emojis_ul = $(".emojis ul");
+          smileys.split(",").forEach(function(smiley){
+              var li = $("<li/>").text(smiley);
+              li.text(smiley);
+              emojis_ul.append(li);
+          })
+
+          $('.emojis').Emoji({
+              path:  './static/emoji/img/apple40/',
+              class: 'emoji',
+              ext:   'png'
+          });
+
+          $(".emojis ul li").on("click",function(){
+              var emoji = getTextWithAlt($(this));
+              $("#message-to-send").append(emoji);
+              $("#message-to-send").trigger("propertychange");
+              $(".emojis").hide();
+          })
+
+          $(".emoji-icon").click(function(){
+              $(".emojis").toggle();
+          })
+
+          $(document).mouseup(function(e)
+          {
+              var container = $(".emojis");
+
+              // if the target of the click isn't the container nor a descendant of the container
+              if (!container.is(e.target) && container.has(e.target).length === 0)
+              {
+                  container.hide();
+              }
+          });
+
+          $("time.timeago").timeago();
+
+
+
+          $("#message-to-send").on("keypress input propertychange", function (e) {
+              var key = e.keyCode;
+
+              var that = $(this);
+
+              var value = getTextWithAlt(that);
+
+
+              // If the user has pressed enter
+              if (key == 13) {
+                  if(value.trim() == "") return;
+                  addMessage("my-message-template","", value, require("./conf").uuid);
+                  require('electron').ipcRenderer.send('send', { msg: value  });
+
+
+                  setTimeout(function(){
+                      that.empty();
+                      scrollToLastMessage();
+                  },10)
+              }
+
+              setTimeout(function(){
+                  emojify("#message-to-send",function(){
+                      placeCaretAtEnd( document.getElementById("message-to-send") );
+                  })
+              },10)
+          });
+
+      });
+
+
+      function getTextWithAlt(elem){
+          var input = elem.clone();
+          input.find('img').replaceWith(function() { return this.alt; });
+          var value = input.text();
+          return value;
+      }
+
+      function emojify(selector,callback){
+          setTimeout(function(){
+              var emojo = $("<div/>");
+              emojo.text(getTextWithAlt($(selector)));
+
+              emojo.Emoji({
+                  path:  './static/emoji/img/apple40/',
+                  class: 'emoji',
+                  alt: true,
+                  ext:   'png'
+              });
+              $(selector).html(emojo.html());
+              callback();
+          },10)
+      }
+
+      function placeCaretAtEnd(el) {
+          el.focus();
+          if (typeof window.getSelection != "undefined"
+                  && typeof document.createRange != "undefined") {
+              var range = document.createRange();
+              range.selectNodeContents(el);
+              range.collapse(false);
+              var sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(range);
+          } else if (typeof document.body.createTextRange != "undefined") {
+              var textRange = document.body.createTextRange();
+              textRange.moveToElementText(el);
+              textRange.collapse(false);
+              textRange.select();
+          }
+      }
+
+
+      require('electron').ipcRenderer.on('message' , function(event , msg){
+          addMessage("other-message-template",msg.name, msg.text, msg.id )
+          scrollToLastMessage();
+      });
+
+      require('electron').ipcRenderer.on('keepalive' , function(event , user){
+
+          var current = new Date();
+
+          if(!userlist.keys.includes(user.id)){
+              userlist.keys.push(user.id);
+              userlist.user.push(user);
+          }
+          userlist.user.findById(user.id).lastSeen = current;
+          userlist.user.findById(user.id).timeago = current.toISOString();
+          userlist.user.findById(user.id).online = function(){
+              return  (new Date().getTime() - this.lastSeen.getTime()) / 1000 <= 15;
+          }
+
+      });
+
+      function renderUserlist(){
+          var template = "{{#user}}"+require('./templates').userlist+" {{/user}}";
+          var output = require('mustache').render(template, userlist);
+          userlist.user.sort(function(u1, u2){return u2.lastSeen - u1.lastSeen});
+          $("#user-wrapper .people-list ul").html(output);
+          $("time.timeago").timeago();
+      }
+
+      setInterval(function(){
+          renderUserlist();
+      },1000);
+
+      Array.prototype.findById = function(id){
+          'use strict';
+          if (this == null) {
+              throw new TypeError('Array.prototype.findById called on null or undefined');
+          }
+
+          var O = Object(this);
+          var len = parseInt(O.length, 10) || 0;
+          if (len === 0) {
+              return false;
+          }
+          var n = parseInt(arguments[1], 10) || 0;
+          var k;
+          if (n >= 0) {
+              k = n;
+          } else {
+              k = len + n;
+              if (k < 0) {k = 0;}
+          }
+          var currentElement;
+          while (k < len) {
+              currentElement = O[k];
+              if (id === currentElement.id) { // NaN !== NaN
+                  return currentElement;
+              }
+              k++;
+          }
+      }
+
+
+      Date.prototype.format_de = function() {
+          var yyyy = this.getFullYear();
+          var mm = this.getMonth() < 9 ? "0" + (this.getMonth() + 1) : (this.getMonth() + 1); // getMonth() is zero-based
+          var dd  = this.getDate() < 10 ? "0" + this.getDate() : this.getDate();
+          var hh = this.getHours() < 10 ? "0" + this.getHours() : this.getHours();
+          var min = this.getMinutes() < 10 ? "0" + this.getMinutes() : this.getMinutes();
+          return "".concat(dd).concat(".").concat(mm).concat(".").concat(yyyy).concat(" ").concat(hh).concat(":").concat(min);
+      };
+
+
+      function addMessage(templateId,name,message,uuid){
+          var template = $("#"+templateId).clone();
+
+          template.find(".name").text(name);
+          template.find(".time").text(new Date().format_de());
+          template.find(".message").text(message);
+          template.find(".uuid").text(uuid);
+
+          var li = $('<li/>');
+          li.addClass("clearfix");
+          var msg = template.html();
+          li.append(msg);
+
+          var lstMsgWrapper = $(".chat-history li").last();
+
+          var lstTime = lstMsgWrapper.find(".time").text();
+          var tmpTime = template.find(".time").text();
+          var lstUuid = lstMsgWrapper.find(".uuid").text();
+          var tmpUuid = template.find(".uuid").text();
+
+          if(lstTime == tmpTime && lstUuid == tmpUuid){
+              li.addClass("append");
+          }
+
+          $(".chat-history ul").append(li);
+      }
+
+
+
+      function scrollToLastMessage(){
+          var chatHistory    = $('.chat-history');
+          var height = chatHistory[0].scrollHeight;
+          chatHistory.scrollTop(height);
+
+          $('.message').Emoji({
+              path:  './static/emoji/img/apple40/',
+              class: 'emoji',
+              ext:   'png'
+          });
+      }
+
+
+
+
+
+
+  </script>
+  </body>
+
+  <script type="text/javascript" src="./static/emoji/js/jQueryEmoji.min.js"></script>
+</html>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <file url="file://$PROJECT_DIR$" libraries="{udp/node_modules}" />
+    <file url="file://$PROJECT_DIR$/FlexMess-linux-x64/resources/app" libraries="{udp/FlexMess-linux-x64/resources/app/node_modules}" />
+    <file url="file://$PROJECT_DIR$/FlexMess-win32-x64/resources/app" libraries="{udp/FlexMess-win32-x64/resources/app/node_modules}" />
+    <includedPredefinedLibrary name="ECMAScript 6" />
+  </component>
+</project>
