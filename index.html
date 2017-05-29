@@ -35,8 +35,13 @@
 
                       </ul>
                   </div>
+                  <input style="display: none" id="file" type="file">
                   <div class="emoji-icon">😃</div>
-                  <div id="message-to-send" class="editable" contenteditable></div>
+                  <div class="send-file"><i class="fa fa-paperclip" aria-hidden="true"></i></div>
+                  <div  class="editable" >
+                      <div id="message-to-send" contenteditable></div>
+                  </div>
+
               </div>
           </div>
       </div>
@@ -67,6 +72,11 @@
 
 
   <script>
+      require('electron').ipcRenderer.on('conf' , function(event , conf){
+          console.log(conf);
+          window.conf = conf;
+      });
+
       var smileys = "😁,😂,😃,😄,😅,😆,😉,😊,😋,😌,😍,😏,😒,😓,😔,😖,😘,😚,😜,😝,😞,😠,😡,😢,😣,😤,😥,😨,😩,😪,😫,😭,😰,😱,😲,😳,😵,😷,😸,😹,😺,😻,😼,😽,😾,😿,🙀,🙅,🙆,🙇,🙈,🙉,🙊,🙋,🙌,🙍,🙎,🙏"
 
       var userlist = {"keys" : [], "user": []};
@@ -76,6 +86,15 @@
       window.timeago = require('timeago');
 
       $(document).ready(function () {
+
+          $(".send-file").on("click",function(){
+              $("#file").trigger("click");
+          });
+
+
+          $("#file").on("change",function(){
+              sendFile();
+          })
 
           var emojis_ul = $(".emojis ul");
           smileys.split(",").forEach(function(smiley){
@@ -127,7 +146,7 @@
               // If the user has pressed enter
               if (key == 13) {
                   if(value.trim() == "") return;
-                  addMessage("my-message-template","", value, require("./conf").uuid);
+                  addMessage("my-message-template","", value, window.conf.uuid);
                   require('electron').ipcRenderer.send('send', { msg: value  });
 
 
@@ -145,6 +164,11 @@
           });
 
       });
+
+      function sendFile(){
+          var filePath = document.getElementById('file').files[0].path;
+          require('electron').ipcRenderer.send('file', { path: filePath  });
+      }
 
 
       function getTextWithAlt(elem){
@@ -194,8 +218,15 @@
           scrollToLastMessage();
       });
 
-      require('electron').ipcRenderer.on('keepalive' , function(event , user){
+      require('electron').ipcRenderer.on('file' , function(event , msg){
+          var template = "other-message-template";
+          if(window.conf.uuid == msg.id){
+              template = "my-message-template";
+          }
+          addMessageTypeFile(template,msg.name, msg, msg.id )
+      });
 
+      require('electron').ipcRenderer.on('keepalive' , function(event , user){
           var current = new Date();
 
           if(!userlist.keys.includes(user.id)){
@@ -262,7 +293,7 @@
       };
 
 
-      function addMessage(templateId,name,message,uuid){
+      function prepareMessage(templateId,name,message,uuid){
           var template = $("#"+templateId).clone();
 
           template.find(".name").text(name);
@@ -286,9 +317,28 @@
               li.addClass("append");
           }
 
-          $(".chat-history ul").append(li);
+          return li;
       }
 
+      function addMessage(templateId,name,message,uuid){
+          var li = prepareMessage(templateId,name,message,uuid);
+          $(".chat-history ul").append(li);
+
+      }
+
+      function addMessageTypeFile(templateId,name,message,uuid){
+          var li = prepareMessage(templateId,name,message,uuid);
+
+          var a = $('<a/>');
+          a.text(message.fileName)
+          a.attr("href","http://"+message.ip+":"+message.port+"/"+message.fileId);
+          a.attr("targer","_blank");
+
+          console.log(a);
+
+          li.find(".message").html(a);
+          $(".chat-history ul").append(li);
+      }
 
 
       function scrollToLastMessage(){
@@ -302,11 +352,6 @@
               ext:   'png'
           });
       }
-
-
-
-
-
 
   </script>
   </body>

@@ -1,3 +1,5 @@
 FlexMess-*
 local-storage
 release-builds
+.idea
+node_modules

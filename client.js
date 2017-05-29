@@ -26,13 +26,13 @@ Object.keys(interfaces).forEach(function (ifname) {
 });
 
 function broadcast(msg){
-    var message = new Buffer(JSON.stringify(msg));
     broadcastIPs.forEach((ip)=>{
-        _broadcast(message,ip)
+        _broadcast(msg,ip)
     })
 }
 
-function _broadcast(message,address){
+function _broadcast(msg,address){
+    var message = new Buffer(JSON.stringify(msg));
     client.send(message, 0, message.length, conf.port, address, function(err, bytes) {
         if (err) throw err;
     });

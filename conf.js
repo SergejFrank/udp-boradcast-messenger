@@ -2,13 +2,13 @@
 const uuidV4 = require('uuid/v4')
 var username = require('username');
 
-
 if (typeof localStorage === "undefined" || localStorage === null) {
     var LocalStorage = require('node-localstorage').LocalStorage;
-    localStorage = new LocalStorage('./local-storage');
+    localStorage = new LocalStorage(__dirname+'/local-storage');
 }
 
 var uuid;
+
 if(localStorage.getItem("uuid") != null){
     uuid = localStorage.getItem('uuid')
 }else{

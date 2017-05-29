@@ -9,6 +9,7 @@
     "timeago": "latest",
     "username": "latest",
     "node-localstorage": "latest",
+    "express": "latest",
     "jquery": "latest"
 
   }

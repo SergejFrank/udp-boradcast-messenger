@@ -1,10 +1,11 @@
-const {app, BrowserWindow, ipcMain, dialog} = require('electron')
+const {app, BrowserWindow, ipcMain, dialog, session} = require('electron')
 const path = require('path')
 const url = require('url')
 const message = require('./message');
 const client = require('./client');
 const server = require('./server');
 const conf = require('./conf');
+const {filetransfer} = require('./file-transfer');
 
 let broadcast = client.broadcast;
 let win;
@@ -21,7 +22,12 @@ function createWindow () {
   }));
 
   // Open the DevTools.
-  //win.webContents.openDevTools();
+  win.webContents.openDevTools();
+
+  setTimeout(function(){
+    win.webContents.send("conf", conf);
+  },500);
+
 
   win.on('closed', () => {
     win = null
@@ -48,13 +54,14 @@ app.on('activate', () => {
 // SERVER
 server.server.on('message', function (message, remote) {
   var msg = JSON.parse(message);
-  if(conf.uuid != msg.id){
+  msg.ip = remote.address;
+
+  if(msg.type != "message"){
+    win.webContents.send(msg.type, msg);
+  }else if(conf.uuid != msg.id){
     win.webContents.send(msg.type, msg);
   }
-  if(msg.type == "keepalive"){
-    msg.ip = remote.address;
-    win.webContents.send(msg.type, msg);
-  }
+
 });
 
 server.server.on('error',function(err){
@@ -82,4 +89,15 @@ ipcMain.on('send', (event, arg)=> {
   let msg = message.Message;
   msg.text = arg.msg;
   broadcast(msg);
+});
+
+
+ipcMain.on('file', (event, arg)=> {
+  filetransfer.fileUpload(arg.path,function(fileData){
+    let msg = message.File;
+    msg.fileId = fileData.id;
+    msg.port = fileData.port;
+    msg.fileName = fileData.name;
+    broadcast(msg);
+  });
 });
