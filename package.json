@@ -12,5 +12,8 @@
     "express": "latest",
     "jquery": "latest"
 
+  },
+  "scripts": {
+    "start": "electron ."
   }
 }
