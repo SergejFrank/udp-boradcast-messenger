@@ -10,6 +10,7 @@
     "username": "latest",
     "node-localstorage": "latest",
     "express": "latest",
+    "crypto": "latest",
     "jquery": "latest"
 
   },
