@@ -7,8 +7,12 @@ const server = require('./server');
 const conf = require('./conf');
 const {filetransfer} = require('./file-transfer');
 
-let broadcast = client.broadcast;
-let win;
+var ChatRoom = require('./Models/ChatRoom.js');
+
+
+var room = new ChatRoom("Der Chatroom","Don't know me");
+
+console.log(room.getHash());
 
 function createWindow () {
   // Create the browser window.
