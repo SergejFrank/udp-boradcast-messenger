@@ -1,11 +1,24 @@
 const forge = require('node-forge');
 
 /**
+ * Calculates a sha256 hash for the given input
+ * @param {string} input the text to hash (e.g. base64 string, json formatted object)
+ * @returns {string} the calculated hash (base64 encoded)
+ */
+exports.hashSha256 = function(input) {
+    var md = forge.md.sha256.create();
+    md.update(input, 'utf8');
+    
+    var encoded = forge.util.encode64(md.digest);
+    return encoded;
+}
+
+/**
  * Calculates a RSA signature for the given data with the given private RSA key.
  * Uses an sha256 hash and UTF-8 for text decoding.
  * @param {string} text the text to sign (e.g. base64 string, json formatted object)
  * @param {string} privateKey the private RSA key to use (PEM format) 
- * @returns {string} returns the signature base64 encoded
+ * @returns {string} returns the signature (base64 encoded)
  */
 exports.sign = function (text, privateKey){
     var key = forge.pki.privateKeyFromPem(privateKey);
@@ -14,7 +27,6 @@ exports.sign = function (text, privateKey){
     md.update(text, 'utf8');
     var signature = key.sign(md);
     
-    // var verified = publicKey.verify(md.digest().bytes(), signature);
     return forge.util.encode64(signature);
 }
 
