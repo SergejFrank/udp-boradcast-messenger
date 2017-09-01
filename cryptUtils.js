@@ -9,7 +9,7 @@ exports.hashSha256 = function(input) {
     var md = forge.md.sha256.create();
     md.update(input, 'utf8');
     
-    var encoded = forge.util.encode64(md.digest);
+    var encoded = forge.util.encode64(md.digest().bytes());
     return encoded;
 }
 
