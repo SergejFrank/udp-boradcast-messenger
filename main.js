@@ -1,18 +1,28 @@
 const {app, BrowserWindow, ipcMain, dialog, session} = require('electron')
 const path = require('path')
 const url = require('url')
-const message = require('./message');
+const message = require('./Models/Message.js');
+const Sender = require('./Models/Sender.js')
 const client = require('./client');
 const server = require('./server');
 const conf = require('./conf');
+const crypto = require('./cryptUtils.js')
 const {filetransfer} = require('./file-transfer');
 
 var ChatRoom = require('./Models/ChatRoom.js');
 
+var s = new Sender();
+
+var m = new message(s, "text");
+
+var text = m.getAsBase64();
+var signature = m.sign();
+
+console.log(crypto.validate(text, signature, crypto.getPublicKeyFromPrivateKey(conf.key)));
 
 var room = new ChatRoom("Der Chatroom","Don't know me");
 
-console.log(room.getHash());
+//console.log(room.getHash());
 
 function createWindow () {
   // Create the browser window.

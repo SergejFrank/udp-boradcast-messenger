@@ -21,6 +21,7 @@ ChatRoom.prototype.getHash = function () {
     let iv = new Buffer.alloc(16); // fill with zeros
 
 console.log(this.getPasswordSHA256Base64());
+    return null;
     let cipher = crypto.createCipheriv('aes-256-cbc', this.getPasswordSHA256Base64(), iv);
 
     var crypted = cipher.update(this.getNameBase64(),'base64','base64');

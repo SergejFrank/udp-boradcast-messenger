@@ -1,5 +1,6 @@
 
 const uuidV4 = require('uuid/v4')
+const crypto = require('./cryptUtils.js')
 var username = require('username');
 
 if (typeof localStorage === "undefined" || localStorage === null) {
@@ -8,6 +9,15 @@ if (typeof localStorage === "undefined" || localStorage === null) {
 }
 
 var uuid;
+var key;
+
+if(localStorage.getItem('key') != null){
+  key = localStorage.getItem('key');
+  console.log(crypto.getPublicKeyFromPrivateKey(key));
+}else{
+  key = crypto.generatePrivateKey();
+  localStorage.setItem('key', key);
+}
 
 if(localStorage.getItem("uuid") != null){
     uuid = localStorage.getItem('uuid')
@@ -17,6 +27,7 @@ if(localStorage.getItem("uuid") != null){
 }
 
 
+exports.key = key;
 exports.port = 8888;
 exports.uuid = uuid;
 exports.username = username.sync();
