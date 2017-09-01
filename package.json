@@ -11,6 +11,7 @@
     "node-localstorage": "latest",
     "express": "latest",
     "crypto": "latest",
+    "node-forge": "latest",
     "jquery": "latest"
 
   },

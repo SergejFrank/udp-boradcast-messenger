@@ -1,19 +1,16 @@
 var crypto = require('crypto');
+var {aesEncrypt,hashSha256,aesDecrypt} = require('../cryptUtils.js');
 
+function ChatRoom() {}
 
-
-function ChatRoom(name,password) {
-    this.name = name;
-    this.password = password
+ChatRoom.prototype.getIdentifier = function (name,password) {
+    return aesEncrypt(this.name,hashSha256(this.password));
 }
 
 
-ChatRoom.prototype.getNameBase64 = function () {
-    return new Buffer(this.name).toString('base64');
-};
-
-ChatRoom.prototype.getPasswordSHA256Base64 = function () {
-    return crypto.createHash('sha256').update(this.password, 'utf8').digest('hex').toUpperCase();
+ChatRoom.prototype.getRoomName = function (identifier,password) {
+    var pwHash = hashSha256(password);
+    return aesDecrypt(identifier,pwHash);
 }
 
 
