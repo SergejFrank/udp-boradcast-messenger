@@ -132,3 +132,23 @@ exports.rsaDecryptWithPrivate = function(encrypted, privateKey) {
     var decrypted = key.decrypt(encryptedRaw);
     return decrypted;
 }
+
+/**
+ * Generates a RSA private key.
+ * @returns {string} the private key in PEM format
+ */
+exports.generatePrivateKey = function() {
+    var keypair = forge.pki.rsa.generateKeyPair({bits: 1024, e: 0x10001});
+    return forge.pki.privateKeyToPem(keypair.privateKey);
+}
+
+/**
+ * Converts a private RSA to a public RSA key.
+ * @param {string} privateKey the private key in PEM format
+ * @returns {string} the public key in PEM format
+ */
+exports.getPublicKeyFromPrivateKey = function(privateKey) {
+    var private = forge.pki.privateKeyFromPem(privateKey);
+    var publicKey = forge.pki.setRsaPublicKey(private.n, private.e);   
+    return forge.pki.publicKeyToPem(publicKey); 
+}
