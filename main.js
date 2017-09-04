@@ -16,6 +16,32 @@ var room = new ChatRoom();
 
 //console.log(room.getHash());
 
+function handleMessage(msg){
+    var json = JSON.parse(msg.substr(4));
+    console.log(json);
+    switch (json.type) {
+        case "PublicMessage":
+            handlePublic(json);
+            break;
+        case "PrivateMessage":
+          //TODO private
+            break;
+        case "KeepAlive":
+          //TODO keepalive
+            break;
+    }
+
+}
+
+function handlePublic(json){
+    var chatRoom = room.getRoomName(json.chatRoom,"Public");
+    var content = JSON.parse(aesDecrypt(json.content,hashSha256("Public")))
+    var data = JSON.parse(new Buffer(content.data,"Base64").toString());
+    var validated = crypto.validate(content.data,content.signature,data.sender.publicKey);
+    if(!validated) return;
+
+}
+
 function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({width: 800, height: 600});
@@ -61,18 +87,7 @@ app.on('activate', () => {
 server.server.on('message', function (message, remote) {
   var msg = message.toString();
   if(msg.substr(0,4) == "FLEX"){
-    var json = JSON.parse(msg.substr(4));
-    console.log(json);
-    var chatRoom = room.getRoomName(json.chatRoom,"Public");
-    var content = JSON.parse(aesDecrypt(json.content,hashSha256("Public")));
-    var data = JSON.parse(new Buffer(content.data,"Base64").toString());
-    var validate = crypto.validate(content.data,content.signature,data.sender.publicKey);
-
-    console.log(content.data);
-    console.log(content.signature);
-    console.log(data.sender.publicKey);
-    console.log(data);
-    console.log(validate);
+    handleMessage(msg)
   }
 
   /*var msg = JSON.parse(message);
