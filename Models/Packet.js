@@ -1,6 +1,6 @@
 function Packet(type,chatRoom,content) {
     this.type = type;
-    this.chatRoom = chatRoom.getHash();
+    this.chatRoom = chatRoom;
     this.content = content; //TODO encrypt
 }
 

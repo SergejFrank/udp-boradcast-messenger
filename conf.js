@@ -26,8 +26,12 @@ if(localStorage.getItem("uuid") != null){
     localStorage.setItem('uuid', uuid);
 }
 
+function getPublicKey(){
+    return crypto.getPublicKeyFromPrivateKey(key);
+}
 
 exports.key = key;
 exports.port = 34567;
 exports.uuid = uuid;
 exports.username = username.sync();
+exports.getPublicKey = getPublicKey;
