@@ -15,12 +15,7 @@ Message.prototype.getAsBase64 = function(){
 }
 
 Message.prototype.sign = function(){
-    var message = this.getAsBase64();
-    console.log('message: ' + message);
-    console.log(conf.key);
-    var signed = crypto.sign(message, conf.key);
-    console.log('signed: ' + signed);
-    return signed;
+    return crypto.sign(this.getAsBase64(), conf.key);
 }
 
 module.exports = Message;
