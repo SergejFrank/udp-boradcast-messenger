@@ -42,6 +42,12 @@ function handlePublic(json){
 
 }
 
+function validateData(toValidate) {
+  var data = JSON.parse(new Buffer(toValidate.data,"Base64").toString());
+  var validated = crypto.validate(toValidate.data,toValidate.signature,data.sender.publicKey);
+  return validated ? data : null;
+}
+
 function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({width: 800, height: 600});
