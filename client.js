@@ -32,7 +32,7 @@ function broadcast(msg){
 }
 
 function _broadcast(msg,address){
-    var message = new Buffer(JSON.stringify(msg));
+    var message = new Buffer(msg);
     client.send(message, 0, message.length, conf.port, address, function(err, bytes) {
         if (err) throw err;
     });

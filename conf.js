@@ -34,3 +34,4 @@ exports.key = key;
 exports.port = 34567;
 exports.uuid = uuid;
 exports.username = username.sync();
+exports.getPublicKey = getPublicKey;

@@ -1,6 +1,6 @@
 function Content(message) {
-    this.message = message;
-    this.signature = null; //TODO Calculate the signature
+    this.data = message.getAsBase64();
+    this.signature = message.sign(); //TODO Calculate the signature
 }
 
 

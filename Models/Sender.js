@@ -1,8 +1,8 @@
+var conf = require("../conf.js")
+
 function Sender() {
-    //this.name = conf.username;
-    //this.timestamp = null; //TODO: Generate Key
-    this.name = "me";
-    this.timestamp = 1000;
+    this.name = conf.username;
+    this.publicKey = conf.getPublicKey();
 }
 
 module.exports = Sender;
