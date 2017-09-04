@@ -42,6 +42,18 @@ function handlePublic(json){
     win.webContents.send("message", data);
 }
 
+function handleKeepAlive(json) {
+  var signedData = JSON.parse(new Buffer(json.Content, "base64").toString());
+  var keepAlive = validateData(signedData);
+}
+
+function handlePrivateMessage(json) {
+  var aesKey = crypto.rsaDecryptWithPrivate(json.aesKey, conf.key);
+  var decrypted = crypto.aesDecrypt(json.content, aesKey);
+
+  var privateMessage = validateData(decrypted);
+}
+
 function validateData(toValidate) {
   var data = JSON.parse(new Buffer(toValidate.data,"Base64").toString());
   var validated = crypto.validate(toValidate.data,toValidate.signature,data.sender.publicKey);
