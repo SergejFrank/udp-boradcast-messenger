@@ -36,10 +36,10 @@ function handleMessage(msg){
 function handlePublic(json){
     var chatRoom = room.getRoomName(json.chatRoom,"Public");
     var content = JSON.parse(aesDecrypt(json.content,hashSha256("Public")))
-    var data = JSON.parse(new Buffer(content.data,"Base64").toString());
-    var validated = crypto.validate(content.data,content.signature,data.sender.publicKey);
-    if(!validated) return;
+    var data = validateData(content);
+    if(data == null) return;
 
+    win.webContents.send("message", data);
 }
 
 function validateData(toValidate) {
@@ -107,6 +107,8 @@ server.server.on('message', function (message, remote) {
 
 });
 
+
+
 /*
 server.server.on('error',function(err){
 
@@ -128,12 +130,7 @@ server.server.on('error',function(err){
 
 });
 
-// CLIENT
-ipcMain.on('send', (event, arg)=> {
-  let msg = message.Message;
-  msg.text = arg.msg;
-  broadcast(msg);
-});
+
 
 
 ipcMain.on('file', (event, arg)=> {
