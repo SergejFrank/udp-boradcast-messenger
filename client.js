@@ -27,7 +27,10 @@ Object.keys(interfaces).forEach(function (ifname) {
 
 function broadcast(msg){
     broadcastIPs.forEach((ip)=>{
-        _broadcast(msg,ip)
+        var count = 5;
+        for(count; count>0; count--){
+            setTimeout(()=>_broadcast(msg,ip),count*500)
+        }
     })
 }
 

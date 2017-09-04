@@ -15,12 +15,45 @@ var {aesEncrypt, hashSha256, aesDecrypt} = require('./cryptUtils.js');
 var ChatRoom = require('./Models/ChatRoom.js');
 var broadcast = client.broadcast;
 
-var room = new ChatRoom();
+var joinedRooms = new Map();
+joinedRooms.set("Public","Public");
 
-//console.log(room.getHash());
+var knowMessages = new Map();
+
+
+function isKnownMessage(id){
+    return knowMessages.has(id);
+}
+
+function addKnownMessage(id){
+    knowMessages.set(id,true);
+}
+
+function handleJoin(name,password){
+    joinedRooms.set(password,name);
+}
+
+function handleCommand(msg){
+    var params = msg.split(" ");
+    switch (params[0]){
+        case "/join":
+            if(params.length == 3){
+                handleJoin(params[1],params[2]);
+            }
+            break;
+    }
+    console.log(params);
+}
+
 
 function handleMessage(msg) {
     var json = JSON.parse(msg.substr(4));
+    if(isKnownMessage(json.id)){
+        console.log("already known")
+        return;
+    }else{
+        addKnownMessage(json.id);
+    }
     console.log(json);
     switch (json.type) {
         case "PublicMessage":
@@ -36,13 +69,32 @@ function handleMessage(msg) {
 
 }
 
+function findMatchingRoom(identifier){
+    var chatRoom = new ChatRoom();
+    var found = null;
+    joinedRooms.forEach(function(password,name){
+        try{
+            var room = chatRoom.getRoomName(identifier,password)
+            if(room == name){
+                found = {name: name, password: password};
+            }
+        }catch (e){}
+    })
+    return found;
+}
+
+
+
 function handlePublic(json) {
-    var chatRoom = room.getRoomName(json.chatRoom, "Public");
-    var content = JSON.parse(aesDecrypt(json.content, hashSha256("Public")))
+
+    var chatRoom = new ChatRoom();
+    var room = findMatchingRoom(json.chatRoom);
+    if(room == null) return;
+    var content = JSON.parse(aesDecrypt(json.content, hashSha256(room.password)))
     var data = validateData(content);
     if (data == null) return;
 
-    win.webContents.send("message", data);
+    win.webContents.send("message", {room:room.name, data: data});
 }
 
 function handleKeepAlive(json) {
@@ -75,7 +127,7 @@ function createWindow() {
     }));
 
     // Open the DevTools.
-    win.webContents.openDevTools();
+    //win.webContents.openDevTools();
 
     setTimeout(function () {
         win.webContents.send("conf", conf);
@@ -113,6 +165,11 @@ server.server.on('message', function (message, remote) {
 });
 
 ipcMain.on('send', (event, arg) => {
+    if(arg.msg.substr(0,1) == "/"){
+        handleCommand(arg.msg);
+        return;
+    }
+
     var chat = new ChatRoom();
     var chatIdentifier = chat.getIdentifier("Public", "Public")
     var sender = new Sender();
@@ -121,6 +178,7 @@ ipcMain.on('send', (event, arg) => {
     console.log(content)
     var packet = new Packet("PublicMessage", chatIdentifier, aesEncrypt(JSON.stringify(content),hashSha256("Public")))
     console.log(packet)
+    console.log(hashSha256("Public"))
     broadcast("FLEX"+JSON.stringify(packet));
 
     console.log(arg);

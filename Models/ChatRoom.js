@@ -4,7 +4,7 @@ var {aesEncrypt,hashSha256,aesDecrypt} = require('../cryptUtils.js');
 function ChatRoom() {}
 
 ChatRoom.prototype.getIdentifier = function (name,password) {
-    return aesEncrypt(this.name,hashSha256(this.password));
+    return aesEncrypt(name,hashSha256(password));
 }
 
 

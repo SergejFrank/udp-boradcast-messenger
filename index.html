@@ -214,7 +214,7 @@
 
 
       require('electron').ipcRenderer.on('message' , function(event , msg){
-          addMessage("other-message-template",msg.sender.name, msg.content, msg.timestamp )
+          addMessage("other-message-template",msg.data.sender.name+" ["+msg.room+"]", msg.data.content, msg.data.timestamp )
           scrollToLastMessage();
       });
 
