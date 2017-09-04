@@ -8,10 +8,11 @@ const server = require('./server');
 const conf = require('./conf');
 const crypto = require('./cryptUtils.js')
 const {filetransfer} = require('./file-transfer');
+var {aesEncrypt,hashSha256,aesDecrypt} = require('./cryptUtils.js');
 
 var ChatRoom = require('./Models/ChatRoom.js');
 
-var room = new ChatRoom("Der Chatroom","Don't know me");
+var room = new ChatRoom();
 
 //console.log(room.getHash());
 
@@ -58,17 +59,34 @@ app.on('activate', () => {
 
 // SERVER
 server.server.on('message', function (message, remote) {
-  var msg = JSON.parse(message);
+  var msg = message.toString();
+  if(msg.substr(0,4) == "FLEX"){
+    var json = JSON.parse(msg.substr(4));
+    console.log(json);
+    var chatRoom = room.getRoomName(json.chatRoom,"Public");
+    var content = JSON.parse(aesDecrypt(json.content,hashSha256("Public")));
+    var data = JSON.parse(new Buffer(content.data,"Base64").toString());
+    var validate = crypto.validate(content.data,content.signature,data.sender.publicKey);
+
+    console.log(content.data);
+    console.log(content.signature);
+    console.log(data.sender.publicKey);
+    console.log(data);
+    console.log(validate);
+  }
+
+  /*var msg = JSON.parse(message);
   msg.ip = remote.address;
 
   if(msg.type != "message"){
     win.webContents.send(msg.type, msg);
   }else if(conf.uuid != msg.id){
     win.webContents.send(msg.type, msg);
-  }
+  }*/
 
 });
 
+/*
 server.server.on('error',function(err){
 
   if(err.code == "EADDRINUSE"){
@@ -106,3 +124,4 @@ ipcMain.on('file', (event, arg)=> {
     broadcast(msg);
   });
 });
+*/

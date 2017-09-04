@@ -28,6 +28,6 @@ if(localStorage.getItem("uuid") != null){
 
 
 exports.key = key;
-exports.port = 8888;
+exports.port = 34567;
 exports.uuid = uuid;
 exports.username = username.sync();

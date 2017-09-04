@@ -39,11 +39,11 @@ function _broadcast(msg,address){
 }
 
 setInterval(function(){
-    broadcast(message_template.KeepAlive)
+    //broadcast(message_template.KeepAlive)
 },5000);
 
 setTimeout(function(){
-    broadcast(message_template.KeepAlive)
+    //broadcast(message_template.KeepAlive)
 },500);
 
 exports.broadcast = broadcast;

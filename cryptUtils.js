@@ -96,8 +96,7 @@ exports.aesDecrypt = function(encrypted, key) {
     decipher.start({iv: iv});
     decipher.update(encryptedBuffer);
 
-    var result = decipher.finish();
-    if(result == false)
+    if(!decipher.finish())
         return null;
 
     return decipher.output.data;
