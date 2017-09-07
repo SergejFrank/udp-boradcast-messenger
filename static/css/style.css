@@ -199,20 +199,36 @@ ul{
     width: 0;
     position: absolute;
     pointer-events: none;
-    border-bottom-color: #86BB71;
+    border-bottom-color: #94C2ED;
     border-width: 10px;
     margin-left: -10px;
 }
-.chat .chat-history .my-message {
+
+.chat .chat-history .self .message:after {
+    right: 7%;
+    left: auto;
+    border-bottom-color: #86BB71;
+}
+
+.chat .chat-history .self .message {
     background: #86BB71;
 }
-.chat .chat-history .other-message {
+.chat .chat-history .message {
     background: #94C2ED;
 }
-.chat .chat-history .other-message:after {
+.chat .chat-history .message:after {
     border-bottom-color: #94C2ED;
-
 }
+
+
+.self .message-data-name{
+    padding-left: 10px;
+}
+
+.self .message-data-name, .self .message-data, .self .message{
+    float: right;
+}
+
 
 .chat .chat-history .my-message:after {
     left: 93%;

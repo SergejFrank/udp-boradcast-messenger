@@ -1,5 +1,4 @@
 const crypto = require('../cryptUtils.js');
-
 const conf = require('../conf.js')
 
 function Message(sender,content) {
@@ -9,7 +8,6 @@ function Message(sender,content) {
 }
 
 Message.prototype.getAsBase64 = function(){
-  console.log(JSON.stringify(this));
   return new Buffer(JSON.stringify(this)).toString('base64');
 }
 

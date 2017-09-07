@@ -1,14 +1,11 @@
 var os = require('os');
 var Netmask = require('netmask').Netmask;
 const conf = require('./conf');
-const message_template = require('./message');
 
 // CLIENT
 var dgram = require('dgram');
 var client = dgram.createSocket('udp4');
 var broadcastIPs = [];
-
-
 
 client.on('listening', function(){
     client.setBroadcast(true);
@@ -16,7 +13,6 @@ client.on('listening', function(){
 
 
 var interfaces = os.networkInterfaces();
-
 
 Object.keys(interfaces).forEach(function (ifname) {
     iface = interfaces[ifname][0];
@@ -27,9 +23,9 @@ Object.keys(interfaces).forEach(function (ifname) {
 
 function broadcast(msg){
     broadcastIPs.forEach((ip)=>{
-        var count = 5;
+        var count = 10;
         for(count; count>0; count--){
-            setTimeout(()=>_broadcast(msg,ip),count*500)
+            setTimeout(()=>_broadcast(msg,ip),count*50)
         }
     })
 }
@@ -40,13 +36,5 @@ function _broadcast(msg,address){
         if (err) throw err;
     });
 }
-
-setInterval(function(){
-    //broadcast(message_template.KeepAlive)
-},5000);
-
-setTimeout(function(){
-    //broadcast(message_template.KeepAlive)
-},500);
 
 exports.broadcast = broadcast;
