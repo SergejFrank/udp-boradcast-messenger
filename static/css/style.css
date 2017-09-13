@@ -28,7 +28,7 @@ ul{
     flex:2;
     display: flex;
 }
-#user-wrapper {
+#list-wrapper {
     background-color: #444753;
     flex :0 0 240px;
 }
@@ -88,32 +88,36 @@ ul{
 }
 
 
-
-
-
-.people-list {
+.list-items {
     color: white;
     width: 260px;
     float: left;
     overflow-y: auto;
     max-height: 100vh;
 }
-
-.people-list ul li {
+.list-items li {
+    overflow: hidden;
     padding: 10px;
 }
-
-.people-list ul li:hover {
+.list-items li:hover {
     background-color: rgba(0,0,0,0.2);
 }
-.people-list .about {
+.list-items .about {
     float: left;
 }
-.people-list .about {
+.list-items .about {
     padding-left: 8px;
 }
-.people-list .status {
+.list-items .status {
     color: #92959E;
+}
+
+.room-list{
+    display: none;
+}
+
+.room-item.active{
+    background-color: rgba(0,0,0,0.1);
 }
 
 
@@ -141,18 +145,21 @@ ul{
     overflow-y: auto;
     max-height: 100vh;
 }
+
+.chat .chat-history li {
+    margin-top: 30px;
+}
+
+.chat .chat-history li.append , .chat .chat-history li:first-child{
+    margin-top: 5px;
+}
+
 .chat .chat-history .message-data {
     margin-bottom: 15px;
 }
 
 .chat .chat-history li.append .message-data {
     display: none;
-}
-
-
-.chat .chat-history li.append .message {
-    margin-top: -37px;
-    border-radius: 0px 0px 7px 7px;
 }
 
 .chat .chat-history .message-data-time {
@@ -182,17 +189,16 @@ ul{
     line-height: 26px;
     font-size: 16px;
     border-radius: 7px;
-    margin-bottom: 30px;
     display: inline;
     position: relative;
+    min-width: 100px;
     max-width: calc(90vw - 260px);
-    min-width: 300px;
     word-wrap:break-word;
 }
 
 .chat .chat-history .message:after {
     bottom: 100%;
-    left: 7%;
+    left: 18px;
     border: solid transparent;
     content: " ";
     height: 0;
@@ -205,7 +211,7 @@ ul{
 }
 
 .chat .chat-history .self .message:after {
-    right: 7%;
+    right: 10px;
     left: auto;
     border-bottom-color: #86BB71;
 }
@@ -227,6 +233,7 @@ ul{
 
 .self .message-data-name, .self .message-data, .self .message{
     float: right;
+    clear: both;
 }
 
 
@@ -315,4 +322,22 @@ ul{
 
 .emojis ul li:hover{
     background-color: rgba(0,0,0,0.3);
+}
+
+.list-type {
+    display: table;
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+}
+
+.list-type li{
+    padding: 5px;
+    display: table-cell;
+    cursor: pointer;
+    background-color: rgba(0,0,0,0.1);
+}
+
+.list-type li.active{
+    background-color: transparent;
 }

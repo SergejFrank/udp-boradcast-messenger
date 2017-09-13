@@ -14,4 +14,17 @@ KeepAlive.prototype.sign = function(){
     return crypto.sign(this.getAsBase64(), conf.key);
 }
 
+KeepAlive.prototype.isOnline = function(){
+    return this.offlineSince() < 10;
+}
+
+KeepAlive.prototype.offlineSince = function(){
+    return Math.floor(Date.now() / 1000) - this.timeStamp;
+}
+
+
+KeepAlive.prototype.getDate = function(){
+    return date = new Date(this.timeStamp*1000).toISOString();
+}
+
 module.exports = KeepAlive;

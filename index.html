@@ -13,10 +13,21 @@
 
 <div class="wrapper">
     <div class="chat">
-        <div id="user-wrapper">
+        <div id="list-wrapper">
+
+            <ul class="list-type">
+                <li id="people-l" class="active">User</li>
+                <li id="room-l">Rooms</li>
+            </ul>
 
             <div class="people-list">
-                <ul class="list">
+                <ul class="list-items">
+
+                </ul>
+            </div>
+
+            <div class="room-list">
+                <ul class="list-items">
 
                 </ul>
             </div>
@@ -35,9 +46,7 @@
 
                     </ul>
                 </div>
-                <input style="display: none" id="file" type="file">
                 <div class="emoji-icon">😃</div>
-                <div class="send-file"><i class="fa fa-paperclip" aria-hidden="true"></i></div>
                 <div class="editable">
                     <div id="message-to-send" contenteditable></div>
                 </div>
@@ -48,28 +57,29 @@
 
 </div>
 
-<div id="message-template">
-    <div class="message-data ">
-        <span class="message-data-name"><span class="name"></span></span>
-        <span class="message-data-time"><span class="time"></span></span>
-        <span style="display: none" class="uuid"></span>
-    </div>
-    <div class="message message float-left">
-        <span class="message"></span>
-    </div>
-</div>
-
-
 <script>
     var smileys = "😁,😂,😃,😄,😅,😆,😉,😊,😋,😌,😍,😏,😒,😓,😔,😖,😘,😚,😜,😝,😞,😠,😡,😢,😣,😤,😥,😨,😩,😪,😫,😭,😰,😱,😲,😳,😵,😷,😸,😹,😺,😻,😼,😽,😾,😿,🙀,🙅,🙆,🙇,🙈,🙉,🙊,🙋,🙌,🙍,🙎,🙏"
-
-    var userlist = {"keys": [], "user": []};
-
+    var joinedRooms = require('electron').remote.getGlobal('joinedRooms');
+    var userList = require('electron').remote.getGlobal('userList');
 
     window.$ = window.jQuery = require('jquery');
     window.timeago = require('timeago');
 
     $(document).ready(function () {
+
+        $(document).on("click","#people-l",function (e) {
+            $("#list-wrapper .list-type li").removeClass("active")
+            $(this).addClass("active")
+            $(".people-list").show();
+            $(".room-list").hide();
+        });
+
+        $(document).on("click","#room-l",function (e) {
+            $("#list-wrapper .list-type li").removeClass("active")
+            $(this).addClass("active")
+            $(".room-list").show();
+            $(".people-list").hide();
+        })
 
         var emojis_ul = $(".emojis ul");
         smileys.split(",").forEach(function (smiley) {
@@ -104,7 +114,7 @@
             }
         });
 
-        $("time.timeago").timeago();
+
 
         $("#message-to-send").on("keypress input propertychange", function (e) {
             var key = e.keyCode;
@@ -115,6 +125,7 @@
             if (key == 13) {
                 if (value.trim() == "") return;
                 require('electron').ipcRenderer.send('send', {msg: value});
+
 
                 setTimeout(function () {
                     that.empty();
@@ -129,9 +140,15 @@
             }, 10)
         });
 
+        $(document).on("click",".room-list li",function (e) {
+            var that = $(this);
+            var identifier = that.data("identifier");
+
+            joinedRooms.setActiveRoom(identifier);
+            showCurrentRoomMessages();
+            markActiveRoom();
+        })
     });
-
-
 
     function getTextWithAlt(elem) {
         var input = elem.clone();
@@ -178,71 +195,29 @@
 
 
     require('electron').ipcRenderer.on('message', function (event, msg) {
-        addMessage("message-template", msg.data.sender.name + " [" + msg.room + "]", msg.data.content, msg.data.uuid, msg.self)
+        addMessage(msg)
         scrollToLastMessage();
-    });
-
-
-    require('electron').ipcRenderer.on('keepalive', function (event, user) {
-        var current = new Date();
-
-        if (!userlist.keys.includes(user.id)) {
-            userlist.keys.push(user.id);
-            userlist.user.push(user);
-        }
-        userlist.user.findById(user.id).lastSeen = current;
-        userlist.user.findById(user.id).timeago = current.toISOString();
-        userlist.user.findById(user.id).online = function () {
-            return (new Date().getTime() - this.lastSeen.getTime()) / 1000 <= 15;
-        }
     });
 
     function renderUserlist() {
         var template = "{{#user}}" + require('./static/templates').userlist + " {{/user}}";
-
-        var output = require('mustache').render(template, userlist);
-        userlist.user.sort(function (u1, u2) {
-            return u2.lastSeen - u1.lastSeen
-        });
-        $("#user-wrapper .people-list ul").html(output);
+        var output = require('mustache').render(template, {user: userList.entities()});
+        $("#list-wrapper .people-list ul").html(output);
         $("time.timeago").timeago();
+        jQuery("time.timeago").timeago();
+    }
+
+    function renderJoinedRoomList(){
+        var template = "{{#rooms}}" + require('./static/templates').joinedRoomList + " {{/rooms}}";
+        var output = require('mustache').render(template, {rooms: joinedRooms.entries()});
+        $("#list-wrapper .room-list ul").html(output);
+        markActiveRoom();
     }
 
     setInterval(function () {
         renderUserlist();
+        renderJoinedRoomList();
     }, 1000);
-
-    Array.prototype.findById = function (id) {
-        'use strict';
-        if (this == null) {
-            throw new TypeError('Array.prototype.findById called on null or undefined');
-        }
-
-        var O = Object(this);
-        var len = parseInt(O.length, 10) || 0;
-        if (len === 0) {
-            return false;
-        }
-        var n = parseInt(arguments[1], 10) || 0;
-        var k;
-        if (n >= 0) {
-            k = n;
-        } else {
-            k = len + n;
-            if (k < 0) {
-                k = 0;
-            }
-        }
-        var currentElement;
-        while (k < len) {
-            currentElement = O[k];
-            if (id === currentElement.id) { // NaN !== NaN
-                return currentElement;
-            }
-            k++;
-        }
-    }
-
 
     Date.prototype.format_de = function () {
         var yyyy = this.getFullYear();
@@ -253,58 +228,52 @@
         return "".concat(dd).concat(".").concat(mm).concat(".").concat(yyyy).concat(" ").concat(hh).concat(":").concat(min);
     };
 
-
-    function prepareMessage(templateId, name, message, uuid, self) {
-        var template = $("#" + templateId).clone();
-
-        template.find(".name").text(name);
-        template.find(".time").text(new Date().format_de());
-        template.find(".message").text(message);
-        template.find(".uuid").text(uuid);
+    function prepareMessage(message) {
+        var template = "{{#message}}" + require('./static/templates').message + " {{/message}}";
+        message.data.date = new Date(message.data.timeStamp*1000).format_de();
+        var output = require('mustache').render(template, {message:message});
 
         var li = $('<li/>');
         li.addClass("clearfix");
-        var msg = template.html();
-        li.append(msg);
+        li.addClass("message-wrapper");
+        li.attr("data-room",message.room.id);
+        li.append(output);
 
-        var lstMsgWrapper = $(".chat-history .message-data").last();
-
+        var lstMsgWrapper = $(".message-wrapper[data-room='"+message.room.id+"']").last();
         var lstTime = lstMsgWrapper.find(".time").text();
-        var tmpTime = template.find(".time").text();
+        var tmpTime = new Date().format_de();
         var lstUuid = lstMsgWrapper.find(".uuid").text();
-        var tmpUuid = template.find(".uuid").text();
+        var tmpUuid = message.data.uuid;
 
         if (lstTime == tmpTime && lstUuid == tmpUuid) {
             li.addClass("append");
         }
-
-        if (self) {
-            li.addClass("self")
+        if(message.self){
+            li.addClass("self");
         }
-
         return li;
     }
 
-    function addMessage(templateId, name, message, uuid, self) {
-        var li = prepareMessage(templateId, name, message, uuid, self);
+    function addMessage(msg) {
+        var li = prepareMessage(msg);
         $(".chat-history ul").append(li);
-
+        showCurrentRoomMessages();
     }
 
-    function addMessageTypeFile(templateId, name, message, uuid) {
-        var li = prepareMessage(templateId, name, message, uuid);
 
-        var a = $('<a/>');
-        a.text(message.fileName)
-        a.attr("href", "http://" + message.ip + ":" + message.port + "/" + message.fileId);
-        a.attr("targer", "_blank");
-
-        console.log(a);
-
-        li.find(".message").html(a);
-        $(".chat-history ul").append(li);
+    function showCurrentRoomMessages(){
+        var room = joinedRooms.getActiveRoom().getId();
+        var selector = "[data-room='"+room+"']";
+        $(".message-wrapper:not("+selector+")").hide();
+        $(".message-wrapper"+selector).show();
     }
 
+    function markActiveRoom(){
+        var room = joinedRooms.getActiveRoom().getId();
+        var selector = "[data-room='"+room+"']";
+        $(".room-item").removeClass("active");
+        $(".room-item"+selector).addClass("active");
+    }
 
     function scrollToLastMessage() {
         var chatHistory = $('.chat-history');
