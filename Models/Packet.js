@@ -4,7 +4,7 @@ function Packet(type,chatRoom,content) {
     this.id = uuidV4();
     this.type = type;
     this.chatRoom = chatRoom;
-    this.content = content; //TODO encrypt
+    this.content = content;
 }
 
 module.exports = Packet;

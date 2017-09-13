@@ -58,8 +58,8 @@ function handleMessage(msg) {
         case "PublicMessage":
             handlePublic(json);
             break;
-        case "PrivateMessage":
-            //TODO private
+        case "Invite":
+            handleInvite(json);
             break;
         case "KeepAlive":
             handleKeepAlive(json)
@@ -96,7 +96,7 @@ function handleKeepAlive(json) {
     userList.add(newKeepAlive);
 }
 
-function handlePrivateMessage(json) {
+function handleInvite(json) {
     var aesKey = crypto.rsaDecryptWithPrivate(json.aesKey, conf.key);
     var decrypted = crypto.aesDecrypt(json.content, aesKey);
 
